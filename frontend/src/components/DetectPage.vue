@@ -42,6 +42,12 @@
           <img :src="img" class="img-responsive">
         </figure>
       </div>
+
+      <v-text-field
+            v-model="location"
+            :counter="20"
+            label="위치를 입력하세요"
+      ></v-text-field>
       <!-- <div class="col-md-6">
         <h2>Captured Image</h2>
         <figure class="figure">
@@ -72,6 +78,7 @@ export default {
   },
   data() {
     return {
+      location: '',
       unKnown:false,
       people:[],
       cum_people_log:[],
@@ -113,6 +120,7 @@ export default {
       const baseURI = 'http://localhost:5000/api/detect/';
       var data = new FormData();
       data.append('photo', this.img)
+      data.append('location', this.location)
       axios.post(baseURI, data
       ).then(response=>{
         console.log(response.data)

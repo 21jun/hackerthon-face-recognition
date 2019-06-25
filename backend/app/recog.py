@@ -9,6 +9,7 @@ import base64
 isLoaded = False
 known_face_encodings = []
 known_face_names = []
+known_face_ids = []
 
 def dbcon():
     db = pymysql.connect(
@@ -21,11 +22,11 @@ def dbcon():
     return db
 
 
-def enroll(img_list, name_list):
+def enroll(img_list, name_list, id_list):
     # This is an example of running face recognition on a single image
     # and drawing a box around each person that was identified.
 
-    for img, name in zip(img_list, name_list):
+    for img, name, id in zip(img_list, name_list, id_list):
         # Load a sample picture and learn how to recognize it.
         
         # image = face_recognition.load_image_file(img)
@@ -34,132 +35,151 @@ def enroll(img_list, name_list):
         image = np.asarray(image)
         # print(image)
         # face_encoding = face_recognition.face_encodings(image)
+        # print(len(image))
+
+        # print(len(face_recognition.face_encodings(image)))
+        
+        # print(name)
+
         face_encoding = face_recognition.face_encodings(image)[0]
         
         # Create arrays of known face encodings and their names
         known_face_encodings.append(face_encoding)
         known_face_names.append(name)
+        known_face_ids.append(id)
 
 def recognition(img):
     # Load an image with an unknown face
-        # unknown_image = face_recognition.load_image_file(img)
-        unknown_image = Image.frombytes('RGB', (640, 480), img, 'raw')
-        unknown_image = np.asarray(unknown_image)
-        # Find all the faces and face encodings in the unknown image
-        face_locations = face_recognition.face_locations(unknown_image)
-        face_encodings = face_recognition.face_encodings(unknown_image, face_locations)
+    # unknown_image = face_recognition.load_image_file(img)
+    unknown_image = Image.frombytes('RGB', (640, 480), img, 'raw')
+    unknown_image = np.asarray(unknown_image)
+    # Find all the faces and face encodings in the unknown image
+    face_locations = face_recognition.face_locations(unknown_image)
+    face_encodings = face_recognition.face_encodings(unknown_image, face_locations)
 
-        # Convert the image to a PIL-format image so that we can draw on top of it with the Pillow library
-        # See http://pillow.readthedocs.io/ for more about PIL/Pillow
-        pil_image = Image.fromarray(unknown_image)
-        # Create a Pillow ImageDraw Draw instance to draw with
-        draw = ImageDraw.Draw(pil_image)
+    # Convert the image to a PIL-format image so that we can draw on top of it with the Pillow library
+    # See http://pillow.readthedocs.io/ for more about PIL/Pillow
+    pil_image = Image.fromarray(unknown_image)
+    # Create a Pillow ImageDraw Draw instance to draw with
+    draw = ImageDraw.Draw(pil_image)
 
-        name_list =[]
-        # Loop through each face found in the unknown image
-        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-            # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+    name_list =[]
+    id_list = []
+    # Loop through each face found in the unknown image
+    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+        # See if the face is a match for the known face(s)
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
 
-            name = "Unknown"
+        name = "Unknown"
 
-            # If a match was found in known_face_encodings, just use the first one.
-            # if True in matches:
-            #     first_match_index = matches.index(True)
-            #     name = known_face_names[first_match_index]
+        # If a match was found in known_face_encodings, just use the first one.
+        # if True in matches:
+        #     first_match_index = matches.index(True)
+        #     name = known_face_names[first_match_index]
 
-            # Or instead, use the known face with the smallest distance to the new face
-            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-            best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
-                name = known_face_names[best_match_index]
-                name = " " + name
-                name_list.append(name)
-                print(name)
-            # Draw a box around the face using the Pillow module
-            draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+        # Or instead, use the known face with the smallest distance to the new face
+        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+        best_match_index = np.argmin(face_distances)
+        if matches[best_match_index]:
 
-            # Draw a label with a name below the face
-            text_width, text_height = draw.textsize(name)
-            draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=(0, 0, 255), outline=(0, 0, 255))
-            draw.text((left + 6, bottom - text_height - 5), name, fill=(255, 255, 255, 255))
+            name = known_face_names[best_match_index]
+            name_list.append(name)
 
-        # Remove the drawing library from memory as per the Pillow docs
-        del draw
+            id = known_face_ids[best_match_index]
+            id_list.append(id)
+            
+            print(id, name)
+        # Draw a box around the face using the Pillow module
+        draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
 
-        # Display the resulting image
-        pil_image.show()
+        # Draw a label with a name below the face
+        text_width, text_height = draw.textsize(name)
+        draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=(0, 0, 255), outline=(0, 0, 255))
+        draw.text((left + 6, bottom - text_height - 5), name, fill=(255, 255, 255, 255))
 
-        # print(name) 
-        return name_list, pil_image
+    # Remove the drawing library from memory as per the Pillow docs
+    del draw
 
-def realtime_recognition(img):
+    # Display the resulting image
+    pil_image.show()
+
+    # print(name) 
+    return name_list, id_list
+
+def realtime_recognition(img, location):
     # Load an image with an unknown face
-        # unknown_image = face_recognition.load_image_file(img)
-        unknown_image = Image.frombytes('RGB', (640, 480), img, 'raw')
-        unknown_image = np.asarray(unknown_image)
-        # Find all the faces and face encodings in the unknown image
-        face_locations = face_recognition.face_locations(unknown_image)
-        face_encodings = face_recognition.face_encodings(unknown_image, face_locations)
+    # unknown_image = face_recognition.load_image_file(img)
+    unknown_image = Image.frombytes('RGB', (640, 480), img, 'raw')
+    unknown_image = np.asarray(unknown_image)
+    # Find all the faces and face encodings in the unknown image
+    face_locations = face_recognition.face_locations(unknown_image)
+    face_encodings = face_recognition.face_encodings(unknown_image, face_locations)
 
-        # Convert the image to a PIL-format image so that we can draw on top of it with the Pillow library
-        # See http://pillow.readthedocs.io/ for more about PIL/Pillow
-        pil_image = Image.fromarray(unknown_image)
-        # Create a Pillow ImageDraw Draw instance to draw with
-        draw = ImageDraw.Draw(pil_image)
+    # Convert the image to a PIL-format image so that we can draw on top of it with the Pillow library
+    # See http://pillow.readthedocs.io/ for more about PIL/Pillow
+    pil_image = Image.fromarray(unknown_image)
+    # Create a Pillow ImageDraw Draw instance to draw with
+    draw = ImageDraw.Draw(pil_image)
 
-        name_list =[]
-        # Loop through each face found in the unknown image
-        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-            # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+    name_list =[]
+    id_list = []
+    # Loop through each face found in the unknown image
+    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+        # See if the face is a match for the known face(s)
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
 
-            name = "Unknown"
+        name = "Unknown"
 
-            # If a match was found in known_face_encodings, just use the first one.
-            # if True in matches:
-            #     first_match_index = matches.index(True)
-            #     name = known_face_names[first_match_index]
+        # If a match was found in known_face_encodings, just use the first one.
+        # if True in matches:
+        #     first_match_index = matches.index(True)
+        #     name = known_face_names[first_match_index]
 
-            # Or instead, use the known face with the smallest distance to the new face
-            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-            best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
-                name = known_face_names[best_match_index]
-                name = " " + name
-                name_list.append(name)
-                print(name)
-            # Draw a box around the face using the Pillow module
-            draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+        # Or instead, use the known face with the smallest distance to the new face
+        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+        best_match_index = np.argmin(face_distances)
+        if matches[best_match_index]:
+            name = known_face_names[best_match_index]
+            name_list.append(name)
 
-            # Draw a label with a name below the face
-            text_width, text_height = draw.textsize(name)
-            draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=(0, 0, 255), outline=(0, 0, 255))
-            draw.text((left + 6, bottom - text_height - 5), name, fill=(255, 255, 255, 255))
+            id = known_face_ids[best_match_index]
+            id_list.append(id)
 
-        # Remove the drawing library from memory as per the Pillow docs
-        del draw
+            print(id, name)
+        # Draw a box around the face using the Pillow module
+        draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+
+        # Draw a label with a name below the face
+        text_width, text_height = draw.textsize(name)
+        draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=(0, 0, 255), outline=(0, 0, 255))
+        draw.text((left + 6, bottom - text_height - 5), name, fill=(255, 255, 255, 255))
+
+    # Remove the drawing library from memory as per the Pillow docs
+    del draw
+
+    # insert logs
+    for id in id_list:
+        set_log_to_db(id, location)
 
 
 
-        # Insert Logs
-        for name in name_list:
-            set_log_to_db(name, "this is a log")
+    # for name in name_list:
+    #     set_log_to_db(user_id)
 
-        # Display the resulting image
-        # pil_image.show()
+    # Display the resulting image
+    # pil_image.show()
 
-        # print(name) 
-        return name_list, pil_image
+    # print(name) 
+    return name_list, id_list
 
-def set_log_to_db(user_name, log):
+def set_log_to_db(user_id, location ="Main Entrance", activity = "None"):
     db = dbcon()
     cursor = db.cursor()
     SQL = '''
-        insert into visit_log(id, user_name, date, log) 
-        values(NULL, %s, now(), %s);
+        INSERT INTO visit_log (id, user_id, location, activity, date)
+        VALUES (NULL, %s, %s, %s, now())
     '''
-    cursor.execute(SQL, (user_name, "this is test log"))
+    cursor.execute(SQL, (user_id, location, activity))
     db.commit()
 
 def get_img_from_db(id):
@@ -172,7 +192,7 @@ def get_img_from_db(id):
         )
 
     cursor = db.cursor()
-    SQL = 'SELECT face_image FROM target  where id = {id};'
+    SQL = 'SELECT face_image FROM target  where user_id = {id};'
     cursor.execute(SQL.format(id= id))
 
     aaa = cursor.fetchall()
@@ -194,18 +214,20 @@ def get_img_from_db2():
         )
 
     cursor = db.cursor()
-    SQL = 'SELECT face_image, name FROM test.user;'
+    SQL = 'SELECT face_image, name, user_id FROM test.user2;'
     cursor.execute(SQL)
 
     aaa = cursor.fetchall()
     
     imgs =[]
     names =[]
+    ids = []
     for data in aaa:
         imgs.append(data[0])
         names.append(data[1])
+        ids.append(data[2])
 
-    return imgs, names
+    return imgs, names, ids
 
 
 if __name__ == '__main__':

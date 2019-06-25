@@ -58,8 +58,8 @@ def test():
 
 
 def json_default(value): 
-    if isinstance(value, datetime.date): 
-        return value.strftime('%Y-%m-%d') 
+    if isinstance(value, datetime.datetime): 
+        return value.strftime('%Y-%m-%d, %H:%M:%S') 
     raise TypeError('not JSON serializable')
 
 # 날짜 정보를 입력하면 그날의 최고 동접자수를 기록한 게임 20개 반환
@@ -156,22 +156,23 @@ def getRegistInfo():
     }
     # print(request.form['photo'])
     SQL = '''
-        INSERT INTO user (id, name, birth, phone, email, face_image, reg_date)
-        VALUES (NULL, %s, %s, %s, %s, %s, %s)
+        INSERT INTO user2 (user_id, name, birth, phone, face_image, reg_date)
+        VALUES (%s, %s, %s, %s, %s, now())
     '''
     base64txt = request.form['photo']
     base64txt = base64txt.split(',')
 
+    user_id = int(request.form['user_id'])
     name = request.form['name']
     birth = request.form['birth']
     phone = request.form['phone']
     email = request.form['email']
 
-
     face_image = image_to_blob(base64txt[1])
-    reg_date = "2019-06-25"
 
-    cursor.execute(SQL, (name, birth, phone, email, face_image, reg_date))
+
+
+    cursor.execute(SQL, (int(user_id), name, birth, phone, face_image))
     db.commit()
 
     # 이미지 출력
@@ -199,26 +200,58 @@ def getFrameToDetect():
 
     # image = Image.frombytes('RGB', (640, 480), face_image, 'raw')
     # image.show()
+    location = request.form['location']
+    print(location)
+
 
 
     if recog.isLoaded:
         pass
     else:
         print("enrolling")
-        imgs, names = recog.get_img_from_db2()
-        recog.enroll(imgs, names)
+        imgs, names, ids = recog.get_img_from_db2()
+        # print(len(imgs), len(names), "===========")
+        # print(imgs[4])
+        recog.enroll(imgs, names, ids)
         recog.isLoaded = True
 
     # img = recog.get_img_from_db(4)
     print("detecting")
     img = face_image
     # name_list, pil_image = recog.recognition(img)
-    name_list, pil_image = recog.realtime_recognition(img)
+    name_list, id_list = recog.realtime_recognition(img, location)
 
 
     response['list'] = name_list
     # response['img'] = pil_image.tobytes()
     return json.dumps(response, default = json_default)
+
+@app.route("/api/log/<user_id>")
+def getUserTimeSpend(user_id):
+
+    response = {
+        'success': False,
+        'list': [],
+        'error': ''
+    }
+
+    db = db_conn()
+    cursor = db.cursor()
+    SQL = '''
+    SELECT location, date from visit_log where user_id = %s
+    '''
+
+    cursor.execute(SQL, (user_id))
+    result = cursor.fetchall()
+
+
+    # print(result)
+    response["list"] = result
+    response["success"] = True
+    cursor.close()
+    #print(response)
+    return json.dumps(response, default = json_default)
+
 
 if __name__ == "__main__":
     # app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'

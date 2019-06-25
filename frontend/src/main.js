@@ -8,13 +8,16 @@ import vuetify from 'vuetify'
 import '../node_modules/vuetify/dist/vuetify.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import axios from 'axios'
+import VueGoogleCharts from 'vue-google-charts'
+
 //import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 
 Vue.config.productionTip = false
 Vue.use(WebCam);
 Vue.use(vuetify);
-Vue.use(axios)
+Vue.use(VueGoogleCharts);
+Vue.use(axios);
 
 Vue.prototype.$EventBus = new Vue();
 /* eslint-disable no-new */

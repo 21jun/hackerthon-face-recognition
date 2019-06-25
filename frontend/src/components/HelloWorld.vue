@@ -44,6 +44,11 @@
       </div>
       <div>
         <v-text-field
+            v-model="user_id"
+            :counter="10"
+            label="학번을 입력하세요"
+        ></v-text-field>
+        <v-text-field
             v-model="user_name"
             :counter="10"
             label="이름을 입력하세요"
@@ -63,9 +68,9 @@
             :counter="10"
             label="이메일을 입력하세요"
         ></v-text-field>
-        <button type="button" 
-                    class="btn btn-info" 
-                    @click="sendImgToServer">Send Image</button>
+
+        <v-checkbox v-model="checkbox" :label="'개인정보 처리 약관에 동의합니다.'"></v-checkbox>
+        <v-btn color="blue" @click="sendImgToServer">회원 가입</v-btn>
 
       </div>
     </div>
@@ -83,7 +88,9 @@ export default {
   },
   data() {
     return {
+      checkbox : false,
       user_name : '',
+      user_id: 0,
       user_birth : '',
       user_phone : '',
       user_email : '',
@@ -114,19 +121,30 @@ export default {
   methods: {
     sendImgToServer()
     {
-      const baseURI = 'http://localhost:5000/api/regist/';
-      var data = new FormData();
-      data.append('name', this.user_name)
-      data.append('photo', this.img)
-      data.append('phone', this.user_phone)
-      data.append('birth', this.user_birth)
-      data.append('email', this.user_email)
-      axios.post(baseURI, data
-      ).then(response=>{
-        console.log(response.data)
-      }).catch((ex) => {
-        console.log("ERROR", ex)
-      })
+      if(this.checkbox){
+
+        if(this.img == null){
+          this.onCapture()
+        }
+
+        const baseURI = 'http://localhost:5000/api/regist/';
+        var data = new FormData();
+        data.append('name', this.user_name)
+        data.append('user_id', this.user_id)
+        data.append('photo', this.img)
+        data.append('phone', this.user_phone)
+        data.append('birth', this.user_birth)
+        data.append('email', this.user_email)
+        axios.post(baseURI, data
+        ).then(response=>{
+          console.log(response.data)
+        }).catch((ex) => {
+          console.log("ERROR", ex)
+        })
+      }
+      else{
+        return
+      }
     },
     onCapture() {
       this.img = this.$refs.webcam.capture();

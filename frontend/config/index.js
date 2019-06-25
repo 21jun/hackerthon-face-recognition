@@ -18,11 +18,11 @@ module.exports = {
               '^/test': ''
           }
       },
-      '/board/list': {
-          target: 'http://localhost:5000/board/list',
+      '/api/log': {
+          target: 'http://localhost:5000/api/log',
           changeOrigin: true,
           pathRewrite: {
-              '^/board/list': ''
+              '^/api/log': ''
           }
       },
       '/db/applist': {

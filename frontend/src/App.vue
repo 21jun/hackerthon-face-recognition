@@ -28,6 +28,17 @@
             </v-list-tile-content>
           </v-list-tile>
         </router-link>
+
+        <router-link to="/UserStatics">
+          <v-list-tile @click="">
+            <v-list-tile-action>
+              <v-icon>list</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>사용자 통계</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </router-link>
       
       </v-list>
     </v-navigation-drawer>
