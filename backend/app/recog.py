@@ -62,7 +62,8 @@ def recognition(img):
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
                 name = " " + name
-            name_list.append(name)
+                name_list.append(name)
+                print(name)
             # Draw a box around the face using the Pillow module
             draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
 
@@ -78,7 +79,7 @@ def recognition(img):
         pil_image.show()
 
         print(name) 
-        return name_list
+        return name_list, pil_image
 
 
 
@@ -130,11 +131,12 @@ def get_img_from_db2():
 
 if __name__ == '__main__':
 
+    pass
 
-    imgs, names = get_img_from_db2()
-    enroll(imgs, names)
+    # imgs, names = get_img_from_db2()
+    # enroll(imgs, names)
 
-    img = get_img_from_db(4)
-    recognition(img)
+    # img = get_img_from_db(4)
+    # recognition(img)
 
        

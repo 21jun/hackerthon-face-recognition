@@ -25,9 +25,8 @@
             </select>
           </div>
           <div class="col-md-12">
-            <button type="button" 
-                    class="btn btn-primary" 
-                    @click="onCapture">Capture Photo</button>
+            <v-btn color="success"
+                    @click="onCapture">Capture Photo</v-btn>
             <button type="button" 
                     class="btn btn-danger" 
                     @click="onStop">Stop Camera</button>
@@ -40,8 +39,17 @@
       <div class="col-md-6">
         <h2>Captured Image</h2>
         <figure class="figure">
-          <img :src="img" class="img-responsive" >
+          <img :src="img" class="img-responsive">
         </figure>
+      </div>
+      <!-- <div class="col-md-6">
+        <h2>Captured Image</h2>
+        <figure class="figure">
+          <img :src="result_img" class="img-responsive">
+        </figure>
+      </div> -->
+      <div class="green darken-2 text-xl-center" v-for="person in people" :key="person">
+        <span class="white--text">{{person}}님 어서오세요</span>
       </div>
     </div>
   </div>
@@ -58,6 +66,8 @@ export default {
   },
   data() {
     return {
+      people:[],
+      result_img: null,
       img: null,
       camera: null,
       deviceId: null,
@@ -91,6 +101,14 @@ export default {
       axios.post(baseURI, data
       ).then(response=>{
         console.log(response.data)
+        this.people = []
+        response.data['list'].forEach(element => {
+          this.people.push(element)
+        });
+
+        // this.result_img = response.data['img']
+        // console.log(response.data['img'])
+
       }).catch((ex) => {
         console.log("ERROR", ex)
       })

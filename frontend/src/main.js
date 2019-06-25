@@ -6,6 +6,7 @@ import router from './router'
 import WebCam from "vue-web-cam";
 import vuetify from 'vuetify'
 import '../node_modules/vuetify/dist/vuetify.css'
+import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import axios from 'axios'
 //import 'material-design-icons-iconfont/dist/material-design-icons.css'
 

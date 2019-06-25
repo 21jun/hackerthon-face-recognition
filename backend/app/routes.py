@@ -188,6 +188,7 @@ def getFrameToDetect():
     response = {
         'success': False,
         'list': [],
+        'img':[],
         'error': ''
     }
 
@@ -205,8 +206,11 @@ def getFrameToDetect():
 
     # img = recog.get_img_from_db(4)
     img = face_image
-    recog.recognition(img)
+    name_list, pil_image = recog.recognition(img)
 
+
+    response['list'] = name_list
+    # response['img'] = pil_image.tobytes()
     return json.dumps(response, default = json_default)
 
 if __name__ == "__main__":

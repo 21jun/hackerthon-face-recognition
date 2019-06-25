@@ -25,9 +25,8 @@
             </select>
           </div>
           <div class="col-md-12">
-            <button type="button" 
-                    class="btn btn-primary" 
-                    @click="onCapture">Capture Photo</button>
+            <v-btn color="success"
+                    @click="onCapture">Capture Photo</v-btn>
             <button type="button" 
                     class="btn btn-danger" 
                     @click="onStop">Stop Camera</button>
