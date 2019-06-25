@@ -48,7 +48,13 @@
           <img :src="result_img" class="img-responsive">
         </figure>
       </div> -->
+      <div class="green darken-2 text-xl-center" v-if="unKnown">
+        <span class="white--text">(?)누구인지 모르겠어요</span>
+      </div>
       <div class="green darken-2 text-xl-center" v-for="person in people" :key="person">
+        <span class="white--text">{{person}}님 어서오세요</span>
+      </div>
+      <div class="purple darken-2 text-xl-center" v-for="person in cum_people_log" :key="person">
         <span class="white--text">{{person}}님 어서오세요</span>
       </div>
     </div>
@@ -66,7 +72,9 @@ export default {
   },
   data() {
     return {
+      unKnown:false,
       people:[],
+      cum_people_log:[],
       result_img: null,
       img: null,
       camera: null,
@@ -92,6 +100,13 @@ export default {
       }
     }
   },
+  // mounted: function () {
+  //       this.$nextTick(function () {
+  //           window.setInterval(() => {
+  //               this.onCapture();
+  //           },1000);
+  //       })
+  // },
   methods: {
     sendDetectFrame()
     {
@@ -104,16 +119,27 @@ export default {
         this.people = []
         response.data['list'].forEach(element => {
           this.people.push(element)
+          this.cum_people_log.push(element)
         });
 
         // this.result_img = response.data['img']
         // console.log(response.data['img'])
 
+        // 조건부 렌더링
+        //console.log(people.length)
+        if (this.people.length == 0){
+          this.unKnown = true;
+        }
+        else{
+          console.log(this.people)
+          this.unKnown = false;
+        }
       }).catch((ex) => {
         console.log("ERROR", ex)
       })
     },
     onCapture() {
+      this.people = []
       this.img = this.$refs.webcam.capture();
       this.sendDetectFrame()
     },

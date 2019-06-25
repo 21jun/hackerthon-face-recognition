@@ -177,6 +177,7 @@ def getRegistInfo():
     # 이미지 출력
     image = Image.frombytes('RGB', (640, 480), face_image, 'raw')
     image.show()
+    recog.isLoaded = False;
     
     return json.dumps(response, default = json_default)
 
@@ -199,14 +200,20 @@ def getFrameToDetect():
     # image = Image.frombytes('RGB', (640, 480), face_image, 'raw')
     # image.show()
 
-    print("detect")
 
-    imgs, names = recog.get_img_from_db2()
-    recog.enroll(imgs, names)
+    if recog.isLoaded:
+        pass
+    else:
+        print("enrolling")
+        imgs, names = recog.get_img_from_db2()
+        recog.enroll(imgs, names)
+        recog.isLoaded = True
 
     # img = recog.get_img_from_db(4)
+    print("detecting")
     img = face_image
-    name_list, pil_image = recog.recognition(img)
+    # name_list, pil_image = recog.recognition(img)
+    name_list, pil_image = recog.realtime_recognition(img)
 
 
     response['list'] = name_list
