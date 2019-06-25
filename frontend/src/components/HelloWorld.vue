@@ -103,7 +103,7 @@ export default {
     },
     onCapture() {
       this.img = this.$refs.webcam.capture();
-      this.sendImgToServer()
+      //this.sendImgToServer()
     },
     onStarted(stream) {
       console.log("On Started Event", stream);

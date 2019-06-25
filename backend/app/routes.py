@@ -23,7 +23,7 @@ def db_conn():
     db = pymysql.connect(
         host="localhost",
         port=3307,
-        db="flasksteam",
+        db="test",
         user="root", 
         password="1qazxc"
     )
@@ -32,7 +32,7 @@ def db_conn():
 db = pymysql.connect(
     host="localhost",
     port=3307,
-    db="flasksteam",
+    db="test",
     user="root", 
     password="1qazxc"
 )
@@ -55,23 +55,6 @@ def test():
     }
     return json.dumps(testData)
 
-
-@app.route("/db/applist")
-def getApplist():
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'applist': [],
-        'error': '',
-    }
-    # if isLogin():
-    SQL = "SELECT * FROM `applist` limit 10"
-    cursor.execute(SQL)
-    response["applist"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    return json.dumps(response)
 
 def json_default(value): 
     if isinstance(value, datetime.date): 
@@ -169,261 +152,34 @@ def getRegistInfo():
         'success': False,
         'list': [],
         'error': ''
-
     }
     # print(request.form['photo'])
     SQL = '''
-        INSERT INTO user 
+        INSERT INTO user (name, birth, phone, email, face_image, reg_date)
+        VALUES (%s, %s, %s, %s, %s, %s)
     '''
     # img = image_to_blob(request.form['photo'])
-    aaa = request.form['photo']
-    aaa = aaa.split(',')
-    
-    img = image_to_blob(aaa[1])
-    
+    base64txt = request.form['photo']
+    base64txt = base64txt.split(',')
+
+    name = "leewonjun"
+    birth = "1998-03-18"
+    phone = "01056205922"
+    email = "21jun7654@gmail.com"
+    face_image = base64txt[1]
+    reg_date = "2019-06-25"
+
+    cursor.execute(SQL, (name, birth, phone, email, face_image, reg_date))
+    db.commit()
+
+    # 이미지 출력\
+    img = image_to_blob(base64txt[1])
     image = Image.frombytes('RGB', (640, 480), img, 'raw')
     image.show()
-
-    # pic = get_as_base64(request.form['photo'])
-
-    # cursor.execute(SQL.format(appid=appid))
-    # response["player_count"] = cursor.fetchall()
-    # response["success"] = True
-    # cursor.close()
-    # #print("re", response)
-    # print(img)
-    # response['list'] = img
+    
     return json.dumps(response, default = json_default)
 
-# text 넣으면 applist 정보들 반환
-@app.route("/db/applist/<text>")
-def searchApp(text):
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'list': [],
-        'error': ''
-    }
 
-    print(text)
-
-    SQL ='''
-    SELECT 
-        *
-    FROM
-        (SELECT 
-            *
-        FROM
-            `applist`
-        WHERE
-            name LIKE '%%{text}%%') T1
-            INNER JOIN
-        `appinfo` T2 ON T2.appid = T1.appid
-    '''
-    cursor.execute(SQL.format(text=text))
-    response["list"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    #print(response)
-    return json.dumps(response, default = json_default)
-
-# tag 넣으면 해당 태그게임들 반환
-@app.route("/db/searchTag/<text>")
-def searchTagGame(text):
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'list': [],
-        'error': ''
-    }
-    SQL ='''
-    SELECT 
-        T1.appid, T1.name
-    FROM
-        `applist` T1
-            JOIN
-        (SELECT 
-            appid, tag_name
-        FROM
-            `tags` A
-        JOIN taglist B ON A.tagid = B.tagid
-        WHERE
-            tag_name = '{text}') T2 ON T1.appid = T2.appid
-    '''
-    cursor.execute(SQL.format(text=text))
-    response["list"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    #print(response)
-    return json.dumps(response, default = json_default)
-
-# tag , 최소 동접자수 넣으면 게임 추천
-@app.route("/db/recommand/<tag>/<tag2>/<tag3>/<min>")
-def recommandGame(tag, tag2, tag3, min):
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'list': [],
-        'error': ''
-    }
-    SQL ='''
-    SELECT DISTINCT
-        T1.appid, name, max_player
-    FROM
-        (SELECT 
-            appid, COUNT(*)
-        FROM
-            (SELECT 
-            appid, A.tagid, B.tag_name
-        FROM
-            (SELECT DISTINCT
-            tagid, appid
-        FROM
-            `tags`) A
-        LEFT JOIN (SELECT 
-            *
-        FROM
-            `taglist`
-        WHERE
-            tag_name = '{tag}' OR tag_name = '{tag2}'
-                OR tag_name = '{tag3}') B ON A.tagid = B.tagid
-        WHERE
-            B.tagid IS NOT NULL) T
-        GROUP BY appid
-        HAVING COUNT(*) >= 3) T1
-            LEFT JOIN
-        applist T2 ON T1.appid = T2.appid
-            LEFT JOIN
-        (SELECT 
-            appid, MAX(count) AS max_player
-        FROM
-            `player_count`
-        GROUP BY appid) C2 ON T1.appid = C2.appid
-    WHERE
-        C2.max_player > {min}
-    ORDER BY C2.max_player DESC
-    '''
-    cursor.execute(SQL.format(tag=tag, tag2 = tag2, tag3 =tag3, min = min))
-    response["list"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    # print(response)
-    return json.dumps(response, default = json_default)
-
-# appid 넣으면 게임 이름 반환하는 쿼리
-@app.route("/db/name/<appid>")
-def getGameName(appid):
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'name': '',
-        'error': ''
-    }
-    SQL ='''
-    select name from applist where appid = {appid}
-    '''
-    cursor.execute(SQL.format(appid=appid))
-    response["name"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    #print(response)
-    return json.dumps(response, default = json_default)
-
-@app.route("/db/alltag")
-def getAlltags():
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'list': '',
-        'error': ''
-    }
-    SQL ='''
-    select tag_name from taglist
-    '''
-    cursor.execute(SQL)
-    response["list"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    #print(response)
-    return json.dumps(response, default = json_default)
-
-# appid 넣으면 게임 개발사, 퍼블리셔, 발매일 반환하는 쿼리
-@app.route("/db/info/<appid>")
-def getGameInfo(appid):
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'info': '',
-        'error': ''
-    }
-    SQL ='''
-    select developer, publisher, DATE(release_date) from `appinfo` where appid = {appid}
-    '''
-    cursor.execute(SQL.format(appid=appid))
-    response["info"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    #print(response)
-    return json.dumps(response, default = json_default)
-
-# appid 넣으면 게임 리뷰정보 반환
-@app.route("/db/review/<appid>")
-def getGameReviews(appid):
-    db = db_conn()
-    cursor = db.cursor()
-    response = {
-        'success': False,
-        'list': [],
-        'error': ''
-    }
-    SQL ='''
-    SELECT 
-        B.name, A.*
-    FROM
-        (SELECT 
-            appid,
-                MAX(recent_review_count),
-                MAX(recent_review_possitive),
-                MAX(all_review_count),
-                MAX(all_review_possitive),
-                DATE(date)
-        FROM
-            `app_review`
-        GROUP BY appid , DATE(date)) A
-            LEFT JOIN
-        `applist` B ON A.appid = B.appid
-    where A.appid = {appid}
-    '''
-    cursor.execute(SQL.format(appid=appid))
-    response["list"] = cursor.fetchall()
-    response["success"] = True
-    cursor.close()
-    #print(response)
-
-    return json.dumps(response, default = json_default)
-
-'''
-set @prev = (select count from flasksteam.player_count where appid = 39120 limit 1);
-SELECT
-    appid, date, count,
-    @prev as '전일 이용자',
-    (count - @prev) / @prev * 100 as '증감량',
-    @prev := count
-FROM
-    (SELECT
-        appid, count, DATE(date) AS date
-    FROM
-        flasksteam.player_count
-    WHERE
-        appid = 39120
-    GROUP BY appid , DATE(date)) A
-'''
 
 if __name__ == "__main__":
     # app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
