@@ -43,12 +43,19 @@
           <img :src="img" class="img-responsive" >
         </figure>
       </div>
+      <div>
+        <button type="button" 
+                    class="btn btn-danger" 
+                    @click="sendImgToServer">Send Image</button>
+
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { WebCam } from "vue-web-cam";
+import axios from 'axios'
 
 export default {
   name: "App",
@@ -84,10 +91,19 @@ export default {
   methods: {
     sendImgToServer()
     {
-      
+      const baseURI = 'http://localhost:5000/api/regist/';
+      var data = new FormData();
+      data.append('photo', this.img)
+      axios.post(baseURI, data
+      ).then(response=>{
+        console.log(response.data)
+      }).catch((ex) => {
+        console.log("ERROR", ex)
+      })
     },
     onCapture() {
       this.img = this.$refs.webcam.capture();
+      this.sendImgToServer()
     },
     onStarted(stream) {
       console.log("On Started Event", stream);

@@ -10,7 +10,43 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/test': {
+          target: 'http://localhost:5000/test',
+          changeOrigin: true,
+          pathRewrite: {
+              '^/test': ''
+          }
+      },
+      '/board/list': {
+          target: 'http://localhost:5000/board/list',
+          changeOrigin: true,
+          pathRewrite: {
+              '^/board/list': ''
+          }
+      },
+      '/db/applist': {
+          target: 'http://localhost:5000/db/applist',
+          changeOrigin: true,
+          pathRewrite: {
+              '^/db/applist': ''
+          }
+      },
+      '/db/playerCount/': {
+          target: 'http://localhost:5000/db/playerCount/',
+          changeOrigin: true,
+          pathRewrite: {
+              '^/db/playerCount/': ''
+          }
+      },
+      '/api/regist/': {
+        target: 'http://localhost:5000/api/regist/',
+        changeOrigin: true,
+        pathRewrite: {
+            '^/api/regist/': ''
+        }
+    },
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
