@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 from PIL import Image
 from io import BytesIO
+import recog
 import base64
 
 app = Flask(__name__)
@@ -158,23 +159,21 @@ def getRegistInfo():
         INSERT INTO user (name, birth, phone, email, face_image, reg_date)
         VALUES (%s, %s, %s, %s, %s, %s)
     '''
-    # img = image_to_blob(request.form['photo'])
     base64txt = request.form['photo']
     base64txt = base64txt.split(',')
 
-    name = "leewonjun"
+    name = "qwer"
     birth = "1998-03-18"
     phone = "01056205922"
     email = "21jun7654@gmail.com"
-    face_image = base64txt[1]
-    reg_date = "2019-06-25"
+    face_image = image_to_blob(base64txt[1])
+    reg_date = "2019-06-11"
 
     cursor.execute(SQL, (name, birth, phone, email, face_image, reg_date))
     db.commit()
 
-    # 이미지 출력\
-    img = image_to_blob(base64txt[1])
-    image = Image.frombytes('RGB', (640, 480), img, 'raw')
+    # 이미지 출력
+    image = Image.frombytes('RGB', (640, 480), face_image, 'raw')
     image.show()
     
     return json.dumps(response, default = json_default)
