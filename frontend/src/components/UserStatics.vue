@@ -105,11 +105,11 @@ export default {
         this.VisualStudio =0 ;
 
         for (let i = 0; i < k; i++) {
-            if (this.brr[i] == "Main Entrance"){
+            if (this.brr[i] == "Main Enterance"){
     
                 this.MainEntrance += this.arr[i];
             }
-            else if(this.brr[i] == "AR/VR ROOM")
+            else if(this.brr[i] == "VR/AR ROOM")
             {
                 this.VRARROOM += this.arr[i];
             }
