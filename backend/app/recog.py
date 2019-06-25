@@ -61,7 +61,7 @@ def recognition(img):
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
-                name = "Hello! " + name
+                name = " " + name
             name_list.append(name)
             # Draw a box around the face using the Pillow module
             draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
@@ -92,7 +92,7 @@ def get_img_from_db(id):
         )
 
     cursor = db.cursor()
-    SQL = 'SELECT face_image FROM test.user_tmp  where id = {id};'
+    SQL = 'SELECT face_image FROM target  where id = {id};'
     cursor.execute(SQL.format(id= id))
 
     aaa = cursor.fetchall()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     imgs, names = get_img_from_db2()
     enroll(imgs, names)
 
-    img = get_img_from_db(25)
+    img = get_img_from_db(4)
     recognition(img)
 
        

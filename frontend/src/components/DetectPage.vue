@@ -43,32 +43,6 @@
           <img :src="img" class="img-responsive" >
         </figure>
       </div>
-      <div>
-        <v-text-field
-            v-model="user_name"
-            :counter="10"
-            label="이름을 입력하세요"
-        ></v-text-field>
-        <v-text-field
-            v-model="user_birth"
-            :counter="10"
-            label="생년월일을 입력하세요"
-        ></v-text-field>
-        <v-text-field
-            v-model="user_phone"
-            :counter="10"
-            label="전화번호을 입력하세요"
-        ></v-text-field>
-        <v-text-field
-            v-model="user_email"
-            :counter="10"
-            label="이메일을 입력하세요"
-        ></v-text-field>
-        <button type="button" 
-                    class="btn btn-info" 
-                    @click="sendImgToServer">Send Image</button>
-
-      </div>
     </div>
   </div>
 </template>
@@ -84,10 +58,6 @@ export default {
   },
   data() {
     return {
-      user_name : '',
-      user_birth : '',
-      user_phone : '',
-      user_email : '',
       img: null,
       camera: null,
       deviceId: null,
@@ -113,15 +83,11 @@ export default {
     }
   },
   methods: {
-    sendImgToServer()
+    sendDetectFrame()
     {
-      const baseURI = 'http://localhost:5000/api/regist/';
+      const baseURI = 'http://localhost:5000/api/detect/';
       var data = new FormData();
-      data.append('name', this.user_name)
       data.append('photo', this.img)
-      data.append('phone', this.user_phone)
-      data.append('birth', this.user_birth)
-      data.append('email', this.user_email)
       axios.post(baseURI, data
       ).then(response=>{
         console.log(response.data)
@@ -131,7 +97,7 @@ export default {
     },
     onCapture() {
       this.img = this.$refs.webcam.capture();
-      //this.sendImgToServer()
+      this.sendDetectFrame()
     },
     onStarted(stream) {
       console.log("On Started Event", stream);

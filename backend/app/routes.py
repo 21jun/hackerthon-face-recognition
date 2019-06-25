@@ -134,7 +134,7 @@ def getTags(appid):
 def image_to_blob(text) :
     test = BytesIO(base64.b64decode(text))
     im = Image.open(BytesIO(base64.b64decode(text)))
-    im.show()
+    # im.show()
     im = np.array(im)
     result = im.tobytes()
     return result
@@ -156,18 +156,20 @@ def getRegistInfo():
     }
     # print(request.form['photo'])
     SQL = '''
-        INSERT INTO user (name, birth, phone, email, face_image, reg_date)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO user (id, name, birth, phone, email, face_image, reg_date)
+        VALUES (NULL, %s, %s, %s, %s, %s, %s)
     '''
     base64txt = request.form['photo']
     base64txt = base64txt.split(',')
 
-    name = "qwer"
-    birth = "1998-03-18"
-    phone = "01056205922"
-    email = "21jun7654@gmail.com"
+    name = request.form['name']
+    birth = request.form['birth']
+    phone = request.form['phone']
+    email = request.form['email']
+
+
     face_image = image_to_blob(base64txt[1])
-    reg_date = "2019-06-11"
+    reg_date = "2019-06-25"
 
     cursor.execute(SQL, (name, birth, phone, email, face_image, reg_date))
     db.commit()
@@ -178,7 +180,34 @@ def getRegistInfo():
     
     return json.dumps(response, default = json_default)
 
+@app.route("/api/detect/", methods=["POST"])
+def getFrameToDetect():
+    db = db_conn()
 
+    cursor = db.cursor()
+    response = {
+        'success': False,
+        'list': [],
+        'error': ''
+    }
+
+    base64txt = request.form['photo']
+    base64txt = base64txt.split(',')
+    face_image = image_to_blob(base64txt[1])
+
+    # image = Image.frombytes('RGB', (640, 480), face_image, 'raw')
+    # image.show()
+
+    print("detect")
+
+    imgs, names = recog.get_img_from_db2()
+    recog.enroll(imgs, names)
+
+    # img = recog.get_img_from_db(4)
+    img = face_image
+    recog.recognition(img)
+
+    return json.dumps(response, default = json_default)
 
 if __name__ == "__main__":
     # app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'

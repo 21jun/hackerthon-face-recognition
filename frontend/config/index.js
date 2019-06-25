@@ -45,7 +45,14 @@ module.exports = {
         pathRewrite: {
             '^/api/regist/': ''
         }
-    },
+      },
+      '/api/detect/': {
+        target: 'http://localhost:5000/api/detect/',
+        changeOrigin: true,
+        pathRewrite: {
+            '^/api/detect/': ''
+        }
+      }
     },
 
     // Various Dev Server settings
