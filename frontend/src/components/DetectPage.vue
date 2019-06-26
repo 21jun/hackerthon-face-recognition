@@ -58,10 +58,10 @@
         <span class="white--text">(?)누구인지 모르겠어요</span>
       </div>
       <div class="green darken-2 text-xl-center" v-for="person in people" :key="person">
-        <span class="white--text">{{person}}님 어서오세요</span>
+        <span class="white--text">사용자 : {{person}}</span>
       </div>
       <div class="purple darken-2 text-xl-center" v-for="person in cum_people_log" :key="person">
-        <span class="white--text">{{person}}님 어서오세요</span>
+        <span class="white--text">사용자 : {{person}}</span>
       </div>
     </div>
   </div>
